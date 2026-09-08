@@ -1,0 +1,19 @@
+{
+  "name": "me-plus-server",
+  "version": "1.0.0",
+  "description": "Me+ backend (signup / email verify / login) + website, backed by PostgreSQL",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "license": "ISC",
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "cors": "^2.8.6",
+    "express": "^4.21.2",
+    "jsonwebtoken": "^9.0.3",
+    "pg": "^8.13.1"
+  }
+}
