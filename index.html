@@ -1,0 +1,750 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Me+ Visual Direction Preview</title>
+<style>
+  :root{
+    --bg:#050505;
+    --orange:#ff6a00;
+    --orange-deep:#e04e00;
+    --navy:#0e2a22;
+    --mint:#c8f7a0;
+    --text:#f5f5f0;
+    --muted:#9a9a95;
+    --card:#141414;
+    --border:#242424;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html{scroll-behavior:smooth;}
+  body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Malgun Gothic","Apple SD Gothic Neo",sans-serif;overflow-x:hidden;}
+
+  /* ---- floating pill nav (SEED-style) ---- */
+  .nav-glow{
+    position:fixed;top:-120px;left:50%;transform:translateX(-50%);
+    width:900px;height:260px;border-radius:50%;
+    background:radial-gradient(ellipse at center, rgba(255,106,0,0.35), transparent 70%);
+    filter:blur(30px);pointer-events:none;z-index:40;
+  }
+  nav{
+    position:fixed;top:0;left:50%;transform:translateX(-50%);z-index:50;
+    display:flex;align-items:center;justify-content:space-between;gap:36px;
+    width:100%;padding:20px 40px;border-radius:0;
+    background:rgba(20,20,20,0);border:1px solid rgba(255,255,255,0);
+    box-sizing:border-box;
+    transition:background .1s linear;
+  }
+  .brand{display:flex;align-items:center;gap:7px;font-weight:800;font-size:15px;letter-spacing:-0.02em;}
+  .brand .mark{
+    display:inline-flex;align-items:center;justify-content:center;
+    width:22px;height:22px;border-radius:6px;
+    background:var(--orange);color:#0a0a0a;font-weight:900;font-size:13px;
+  }
+  .menu{display:flex;gap:22px;font-size:13px;color:var(--muted);transition:color .3s ease;}
+  .menu span{position:relative;cursor:pointer;padding-bottom:3px;}
+  .menu span::after{content:'';position:absolute;left:0;right:0;bottom:-3px;height:2px;border-radius:2px;
+    background:var(--orange);transform:scaleX(0);transform-origin:left;transition:transform .25s ease;}
+  .menu span:hover{color:var(--text);}
+  .menu span:hover::after{transform:scaleX(1);}
+  nav.on-orange .menu span::after{background:#1a0e00;}
+  .nav-actions{display:flex;align-items:center;gap:16px;flex-shrink:0;white-space:nowrap;overflow:hidden;}
+  .nav-signin{display:inline-block;font-size:13px;font-weight:600;color:var(--text);cursor:pointer;}
+  .nav-cta{background:var(--orange);color:#1a0e00;font-weight:700;font-size:13px;
+    padding:9px 18px;border-radius:999px;border:none;cursor:pointer;flex-shrink:0;}
+  nav.on-orange{}
+  nav.on-orange .brand{color:#1a0e00;}
+  nav.on-orange .menu{color:#3a1f00;}
+  nav.on-orange .nav-signin{color:#1a0e00;}
+  nav.on-orange .nav-cta{background:#0a0a0a;color:var(--orange);}
+
+  /* ---- intro: plain full-screen orange block, sits normally in the page flow.
+     It never pins, never fades away — scrolling just shrinks it a little (still fully
+     visible, opaque, just a smaller rounded "window" now) and carries it up and off
+     with the rest of the page, exactly like scrolling past any other section. ---- */
+  .intro-hero{
+    position:relative; overflow:hidden;
+    height:100vh; width:100%;
+    background:linear-gradient(155deg,var(--orange),var(--orange-deep));
+    display:flex; align-items:center; justify-content:center;
+    transform-origin:center top;
+    will-change:transform,border-radius;
+  }
+  /* on-load intro: a light veil covers the orange, the mark draws itself in stroke by
+     stroke, the wordmark fades in, then the veil fades away to reveal the orange
+     underneath — a one-time entrance animation, plays once on page load only. */
+  .intro-veil{
+    position:absolute; inset:0; z-index:3;
+    background:#f2f1ec;
+    animation:veilFade .7s ease forwards; animation-delay:1.35s;
+  }
+  @keyframes veilFade{ to{ opacity:0; visibility:hidden; } }
+  .intro-logo{
+    position:relative; z-index:4;
+    display:flex; align-items:center; gap:.15em;
+    font-size:clamp(48px,9vw,120px); font-weight:800; letter-spacing:-0.04em;
+    color:#0a0a0a;
+  }
+  .intro-logo svg{width:.8em;height:.8em;}
+  .intro-logo .mk-line{
+    stroke-dasharray:24; stroke-dashoffset:24;
+    animation:drawLine .55s ease forwards;
+  }
+  .intro-logo .mk-line:nth-child(1){animation-delay:.05s;}
+  .intro-logo .mk-line:nth-child(2){animation-delay:.2s;}
+  .intro-logo .mk-line:nth-child(3){animation-delay:.35s;}
+  .intro-logo .mk-line:nth-child(4){animation-delay:.5s;}
+  @keyframes drawLine{ to{ stroke-dashoffset:0; } }
+  .intro-logo .mk-word{
+    display:inline-block; opacity:0;
+    animation:markFadeIn .5s ease forwards; animation-delay:1s;
+  }
+  @keyframes markFadeIn{ to{ opacity:1; } }
+  header.hero{
+    display:flex;align-items:center;
+    padding:140px 60px 100px;gap:60px;
+  }
+  .hero-left{flex:1;min-width:280px;}
+  .eyebrow{color:var(--orange);font-size:13px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;margin-bottom:20px;
+    opacity:0;animation:fadeUp .8s ease forwards;}
+  .hero h1{
+    font-size:clamp(38px,5.4vw,64px);font-weight:800;letter-spacing:-0.03em;line-height:1.1;
+    opacity:0;animation:fadeUp .9s ease forwards; animation-delay:.15s;
+  }
+  .hero h1 span{color:var(--orange);display:inline-flex;align-items:center;}
+  .hero h1 span svg{width:0.72em;height:0.72em;}
+  .hero p{margin-top:22px;font-size:16px;color:var(--muted);max-width:420px;line-height:1.7;
+    opacity:0;animation:fadeUp .9s ease forwards; animation-delay:.3s;}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(18px);}to{opacity:1;transform:translateY(0);}}
+
+  .hero-right{flex:1;min-width:280px;display:flex;flex-direction:column;gap:20px;
+    opacity:0;animation:fadeUp 1s ease forwards;animation-delay:.4s;}
+  .swatch{border-radius:22px;overflow:hidden;position:relative;}
+  .swatch-orange{background:linear-gradient(155deg,var(--orange),var(--orange-deep));}
+  .swatch-mint{background:var(--mint);}
+  .swatch-feature{padding:26px 24px;display:flex;flex-direction:column;justify-content:center;gap:8px;}
+  .swatch-feature .ficon{width:26px;height:26px;display:flex;align-items:center;justify-content:center;margin-bottom:2px;}
+  .swatch-feature .ficon svg{width:100%;height:100%;}
+  .swatch-feature b{font-size:15px;font-weight:700;}
+  .swatch-orange.swatch-feature .ficon{color:#1a0e00;}
+  .swatch-mint.swatch-feature .ficon{color:#1a2a1e;}
+  .swatch-orange.swatch-feature b, .swatch-orange.swatch-feature span{color:#1a0e00;}
+  .swatch-orange.swatch-feature span{font-size:13px;line-height:1.5;opacity:.85;}
+  .swatch-mint.swatch-feature span{font-size:13px;line-height:1.5;color:#1a2a1e;opacity:.85;}
+
+  /* ---- CTA buttons ---- */
+  .cta-row{display:flex;align-items:center;gap:18px;margin-top:32px;
+    opacity:0;animation:fadeUp .9s ease forwards; animation-delay:.45s;}
+  .btn-primary{background:var(--orange);color:#1a0e00;font-weight:700;font-size:14px;
+    padding:13px 26px;border-radius:999px;border:none;cursor:pointer;transition:transform .15s ease;}
+  .btn-primary:hover{transform:translateY(-1px);}
+  .btn-ghost{color:var(--text);font-size:14px;font-weight:600;cursor:pointer;
+    display:flex;align-items:center;gap:6px;}
+
+  .phone-caption{margin-top:16px;text-align:center;max-width:220px;}
+  .phone-caption b{display:block;font-size:14px;font-weight:700;margin-bottom:4px;}
+  .phone-caption span{font-size:12.5px;color:var(--muted);line-height:1.5;}
+  .phone-wrap{display:flex;flex-direction:column;align-items:center;}
+
+  /* ---- phone showcase section ---- */
+  section{padding:120px 60px;}
+  .section-label{color:var(--orange);font-size:12px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;margin-bottom:14px;}
+  .section-title{font-size:clamp(26px,3.6vw,42px);font-weight:800;letter-spacing:-0.02em;max-width:600px;margin-bottom:64px;}
+  .section-title b{color:var(--orange);}
+
+  .phones{display:flex;gap:24px;flex-wrap:wrap;justify-content:center;}
+  .phone{
+    width:220px;height:400px;border-radius:34px;background:#0c0c0c;border:1px solid var(--border);
+    padding:14px;position:relative;overflow:hidden;
+    opacity:0;transform:translateY(50px);transition:opacity .7s ease, transform .7s ease;
+  }
+  .phone.visible{opacity:1;transform:translateY(0);}
+  .phone-screen{width:100%;height:100%;border-radius:24px;overflow:hidden;position:relative;background:#111;}
+  .phone-status{position:absolute;top:12px;left:0;right:0;z-index:3;
+    display:flex;justify-content:space-between;align-items:center;padding:0 18px;
+    font-size:10px;font-weight:700;letter-spacing:.02em;}
+  .phone-status .icons{display:flex;gap:4px;align-items:center;}
+  .phone-status .bars{display:flex;align-items:flex-end;gap:1.5px;height:7px;}
+  .phone-status .bars span{width:2.5px;background:currentColor;border-radius:1px;}
+  .phone-status .bars span:nth-child(1){height:3px;} .phone-status .bars span:nth-child(2){height:5px;}
+  .phone-status .bars span:nth-child(3){height:7px;}
+  .phone-home{position:absolute;bottom:8px;left:50%;transform:translateX(-50%);z-index:3;
+    width:78px;height:4px;border-radius:999px;background:currentColor;opacity:.35;}
+
+  /* phone 1: stat badge */
+  .p1{background:linear-gradient(160deg,var(--orange),var(--orange-deep));display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;}
+  .p1 .phone-status{color:#1a0e00;}
+  .p1 .phone-home{color:#1a0e00;}
+  .p1 .stat{font-size:30px;font-weight:800;color:#1a0e00;}
+  .p1 .badge{width:70px;height:70px;border-radius:50%;background:rgba(0,0,0,0.15);display:flex;align-items:center;justify-content:center;
+    animation:float 3s ease-in-out infinite;}
+  .p1 .badge svg{width:30px;height:30px;color:#1a0e00;}
+  @keyframes float{0%,100%{transform:translateY(0);}50%{transform:translateY(-8px);}}
+  .p1 .cap{font-size:12px;color:#3a1f00;font-weight:600;}
+
+  /* phone 2: network / dotted connections (navy) */
+  .p2{background:var(--navy);}
+  .p2 .phone-status,.p2 .phone-home{color:var(--mint);}
+  .p2 svg{width:100%;height:100%;}
+  .p2 circle{fill:var(--orange);}
+  .p2 .dash{stroke:var(--orange);stroke-width:2;fill:none;stroke-dasharray:6 6;animation:dash 2.4s linear infinite;}
+  @keyframes dash{to{stroke-dashoffset:-48;}}
+  .p2 .label{fill:var(--mint);font-size:9px;font-family:inherit;}
+
+  /* phone 3: menu sheet */
+  .p3{background:#151515;display:flex;flex-direction:column;justify-content:flex-end;}
+  .p3 .phone-status,.p3 .phone-home{color:var(--text);}
+  .sheet{background:#1d1d1d;border-radius:20px 20px 0 0;padding:18px 14px;display:flex;flex-direction:column;gap:10px;
+    transform:translateY(60%);transition:transform .8s cubic-bezier(.2,.8,.2,1);}
+  .phone.visible .sheet{transform:translateY(0);}
+  .row{display:flex;align-items:center;gap:10px;font-size:12px;color:var(--text);padding:8px 6px;border-radius:10px;}
+  .row .dot{width:8px;height:8px;border-radius:50%;background:var(--orange);flex-shrink:0;}
+  .row:nth-child(1){background:rgba(255,106,0,0.12);}
+
+  /* ---- big finale block ---- */
+  .finale{
+    padding:0;position:relative;overflow:hidden;
+    opacity:0;transform:scale(.96);transition:opacity 1s ease, transform 1s ease;
+  }
+  .finale.visible{opacity:1;transform:scale(1);}
+  .finale-inner{
+    background:linear-gradient(180deg,var(--orange) 0%, var(--orange-deep) 100%);
+    min-height:90vh;display:flex;flex-direction:column;justify-content:space-between;
+    padding:60px;color:#1a0e00;
+  }
+  .finale-top{display:flex;justify-content:space-between;align-items:flex-start;font-size:13px;font-weight:700;}
+  .finale-top .rooted{font-size:16px;}
+  .finale-cta{background:#0a0a0a;color:var(--orange);font-weight:700;font-size:14px;
+    padding:12px 24px;border-radius:999px;border:none;cursor:pointer;}
+  .finale-sub{font-size:18px;font-weight:600;color:#3a1f00;margin-bottom:18px;max-width:480px;}
+  .finale-wordmark{
+    display:flex;align-items:center;gap:18px;
+    font-size:clamp(70px,16vw,220px);font-weight:800;letter-spacing:-0.05em;line-height:1;
+    color:#0a0a0a;
+  }
+  .finale-wordmark .mark{
+    width:.7em;height:.7em;border-radius:22%;background:#0a0a0a;color:var(--orange);
+    display:flex;align-items:center;justify-content:center;
+  }
+  .finale-wordmark .mark svg{width:52%;height:52%;}
+  footer.tail{padding:40px 60px;font-size:12px;color:var(--muted);display:flex;justify-content:space-between;}
+
+  /* ---- sign up modal ---- */
+  .modal-overlay{
+    position:fixed; inset:0; z-index:200;
+    background:rgba(0,0,0,0.6); backdrop-filter:blur(6px);
+    display:flex; align-items:center; justify-content:center; padding:20px;
+    opacity:0; pointer-events:none; transition:opacity .25s ease;
+  }
+  .modal-overlay.open{opacity:1; pointer-events:auto;}
+  .modal-card{
+    position:relative; width:min(420px,92vw); max-height:88vh; overflow-y:auto;
+    background:var(--card); border:1px solid var(--border); border-radius:24px;
+    padding:36px 32px 30px;
+    transform:translateY(14px) scale(.98); transition:transform .25s ease;
+  }
+  .modal-overlay.open .modal-card{transform:translateY(0) scale(1);}
+  .modal-close{
+    position:absolute; top:18px; right:18px; width:30px; height:30px; border-radius:50%;
+    background:rgba(255,255,255,0.06); border:none; color:var(--muted);
+    display:flex; align-items:center; justify-content:center; cursor:pointer;
+  }
+  .modal-close:hover{color:var(--text);}
+  .modal-brand{display:flex;align-items:center;gap:8px;font-weight:800;font-size:16px;margin-bottom:22px;}
+  .modal-brand .mark{width:24px;height:24px;border-radius:7px;background:var(--orange);color:#0a0a0a;
+    display:flex;align-items:center;justify-content:center;}
+  .modal-step{display:none;}
+  .modal-step.active{display:block;}
+  .modal-title{font-size:20px;font-weight:800;letter-spacing:-0.01em;margin-bottom:8px;}
+  .modal-sub{font-size:13.5px;color:var(--muted);line-height:1.6;margin-bottom:26px;}
+  .modal-sub b{color:var(--text);}
+  .field{margin-bottom:16px;}
+  .field label{display:block;font-size:12.5px;font-weight:600;color:var(--muted);margin-bottom:7px;}
+  .field input{
+    width:100%;padding:12px 14px;border-radius:11px;border:1px solid var(--border);
+    background:#0d0d0d;color:var(--text);font-size:14px;font-family:inherit;
+  }
+  .field input:focus{outline:none;border-color:var(--orange);}
+  .field-row{display:flex;gap:12px;}
+  .field-row .field{flex:1;}
+  .field-check{display:flex;align-items:flex-start;gap:10px;margin:20px 0 24px;font-size:12.5px;color:var(--muted);line-height:1.5;}
+  .field-check input{margin-top:2px;accent-color:var(--orange);width:15px;height:15px;flex-shrink:0;}
+  .field-check a{color:var(--text);text-decoration:underline;}
+  .btn-block{
+    width:100%;background:var(--orange);color:#1a0e00;font-weight:700;font-size:14.5px;
+    padding:13px;border-radius:12px;border:none;cursor:pointer;transition:opacity .2s ease;
+  }
+  .btn-block:disabled{opacity:.4;cursor:not-allowed;}
+  .code-input{
+    width:100%;padding:14px;border-radius:11px;border:1px solid var(--border);
+    background:#0d0d0d;color:var(--text);font-size:22px;letter-spacing:.5em;text-align:center;
+    font-family:"SFMono-Regular",Consolas,monospace;margin-bottom:18px;
+  }
+  .code-input:focus{outline:none;border-color:var(--orange);}
+  .resend{display:block;text-align:center;font-size:12.5px;color:var(--muted);margin-top:16px;cursor:pointer;}
+  .resend b{color:var(--orange);font-weight:700;}
+  .form-error{min-height:16px;font-size:12.5px;color:#ff6b6b;margin:6px 2px 0;line-height:1.4;}
+  .btn-block:disabled{opacity:0.6;cursor:default;}
+  .modal-success{text-align:center;padding:10px 0 4px;}
+  .success-ring{
+    width:64px;height:64px;border-radius:50%;background:rgba(255,106,0,0.12);
+    display:flex;align-items:center;justify-content:center;margin:0 auto 22px;color:var(--orange);
+  }
+  .modal-success .modal-title{margin-bottom:10px;}
+  .modal-success .modal-sub{margin-bottom:28px;}
+  .modal-link-row{text-align:center;font-size:12.5px;color:var(--muted);margin-top:18px;}
+  .modal-link-row b{color:var(--orange);font-weight:700;cursor:pointer;}
+  .forgot-link{display:block;text-align:right;font-size:12px;color:var(--muted);margin:-8px 0 20px;cursor:pointer;}
+  .forgot-link:hover{color:var(--text);}
+
+  /* subtle film-grain, for depth on the flat dark background */
+  .grain{
+    position:fixed;inset:0;z-index:2;pointer-events:none;opacity:.035;mix-blend-mode:overlay;
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+  }
+</style>
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute">
+  <symbol id="hash" viewBox="0 0 24 24">
+    <line x1="8" y1="0" x2="8" y2="24" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/>
+    <line x1="16" y1="0" x2="16" y2="24" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/>
+    <line x1="0" y1="8" x2="24" y2="8" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/>
+    <line x1="0" y1="16" x2="24" y2="16" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/>
+  </symbol>
+</svg>
+
+<div class="grain"></div>
+<div class="nav-glow"></div>
+<nav id="siteNav">
+  <div class="brand"><span class="mark"><svg viewBox="0 0 24 24" width="13" height="13"><use href="#hash"></use></svg></span>Me+</div>
+  <div class="menu">
+    <span>Home</span><span>Security</span><span>Settings</span><span>Guide</span><span>Credits</span>
+  </div>
+  <div class="nav-actions" id="navActions">
+    <span class="nav-signin">Sign in</span>
+    <button class="nav-cta">Get Started</button>
+  </div>
+</nav>
+
+<div class="intro-hero" id="introHero">
+  <div class="intro-veil"></div>
+  <div class="intro-logo">
+    <svg viewBox="0 0 24 24" fill="none">
+      <line class="mk-line" x1="8" y1="0" x2="8" y2="24" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/>
+      <line class="mk-line" x1="16" y1="0" x2="16" y2="24" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/>
+      <line class="mk-line" x1="0" y1="8" x2="24" y2="8" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/>
+      <line class="mk-line" x1="0" y1="16" x2="24" y2="16" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/>
+    </svg>
+    <span class="mk-word">Me+</span>
+  </div>
+</div>
+
+<header class="hero">
+  <div class="hero-left">
+    <div class="eyebrow">Personal Integration Manager</div>
+    <h1>흩어진 정보를<br>하나의 <span><svg viewBox="0 0 24 24"><use href="#hash"></use></svg></span>Me+로.</h1>
+    <p>이메일, 구글 시트, Obsidian — AI가 채워 넣은 정보를 한 화면에서 확인하고, 여러 AI와 한 창에서 대화해요.</p>
+    <div class="cta-row">
+      <button class="btn-primary">Get Started</button>
+      <span class="btn-ghost">Learn more →</span>
+    </div>
+  </div>
+  <div class="hero-right">
+    <div class="swatch swatch-orange swatch-feature">
+      <div class="ficon">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M4 13V6a1 1 0 0 1 1-1h14a1 1 0 0 1 1 1v7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 13h4.5l1.5 2h4l1.5-2H20" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 13v4a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+      <b>자동으로 모아요</b>
+      <span>이메일과 구글 시트에 쌓이는 정보를 AI가 알아서 정리해서 채워 넣어요.</span>
+    </div>
+    <div class="swatch swatch-mint swatch-feature">
+      <div class="ficon">
+        <svg viewBox="0 0 24 24" fill="none"><rect x="3" y="4" width="18" height="13" rx="4" stroke="currentColor" stroke-width="2"/><path d="M8 17v3l4-3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="8" cy="10.5" r="1.1" fill="currentColor" stroke="none"/><circle cx="12" cy="10.5" r="1.1" fill="currentColor" stroke="none"/><circle cx="16" cy="10.5" r="1.1" fill="currentColor" stroke="none"/></svg>
+      </div>
+      <b>한 창에서 대화해요</b>
+      <span>GPT · Claude · Gemini에게 동시에 물어보고 답을 한눈에 비교해요.</span>
+    </div>
+  </div>
+</header>
+
+<section>
+  <div class="section-label">Rooted in Me+</div>
+  <div class="section-title">하나의 앱에서, <b>전부 다.</b></div>
+  <div class="phones">
+    <div class="phone-wrap">
+      <div class="phone p1-wrap">
+        <div class="phone-screen p1">
+          <div class="phone-status">
+            <span>9:41</span>
+            <span class="icons"><span class="bars"><span></span><span></span><span></span></span></span>
+          </div>
+          <div class="badge"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="12" r="3" fill="currentColor"/></svg></div>
+          <div class="stat">99.9%</div>
+          <div class="cap">오늘의 연동 상태</div>
+          <div class="phone-home"></div>
+        </div>
+      </div>
+      <div class="phone-caption"><b>연동 상태를 한눈에</b><span>오늘 새로 들어온 정보가 얼마나 정리됐는지 바로 확인해요.</span></div>
+    </div>
+    <div class="phone-wrap">
+      <div class="phone p2-wrap">
+        <div class="phone-screen p2">
+          <div class="phone-status">
+            <span>9:41</span>
+            <span class="icons"><span class="bars"><span></span><span></span><span></span></span></span>
+          </div>
+          <svg viewBox="0 0 220 400">
+            <circle cx="60" cy="90" r="5"></circle>
+            <circle cx="160" cy="160" r="5"></circle>
+            <circle cx="70" cy="240" r="5"></circle>
+            <circle cx="150" cy="320" r="5"></circle>
+            <path class="dash" d="M60 90 L160 160 L70 240 L150 320"></path>
+            <text class="label" x="30" y="80">Gmail</text>
+            <text class="label" x="130" y="150">Sheets</text>
+            <text class="label" x="40" y="230">Obsidian</text>
+            <text class="label" x="120" y="310">Bot</text>
+          </svg>
+          <div class="phone-home"></div>
+        </div>
+      </div>
+      <div class="phone-caption"><b>연결 관계까지 투명하게</b><span>어떤 정보가 어디서 와서 어디로 이어지는지 관계도로 보여줘요.</span></div>
+    </div>
+    <div class="phone-wrap">
+      <div class="phone p3-wrap">
+        <div class="phone-screen p3">
+          <div class="phone-status">
+            <span>9:41</span>
+            <span class="icons"><span class="bars"><span></span><span></span><span></span></span></span>
+          </div>
+          <div class="sheet">
+            <div class="row"><span class="dot"></span>이메일 연동</div>
+            <div class="row"><span class="dot"></span>시트 연동</div>
+            <div class="row"><span class="dot"></span>Obsidian 연동</div>
+            <div class="row"><span class="dot"></span>봇 대화창</div>
+            <div class="row"><span class="dot"></span>설정</div>
+          </div>
+          <div class="phone-home"></div>
+        </div>
+      </div>
+      <div class="phone-caption"><b>필요한 기능만 빠르게</b><span>자주 쓰는 연동과 대화창에 한 번의 탭으로 진입해요.</span></div>
+    </div>
+  </div>
+</section>
+
+<section style="padding:0;">
+  <div class="finale">
+    <div class="finale-inner">
+      <div class="finale-top">
+        <div class="rooted">Rooted in Me+.</div>
+        <button class="finale-cta">Get Started →</button>
+      </div>
+      <div>
+        <div class="finale-sub">당신의 정보, 이제 흩어지지 않아요.</div>
+        <div class="finale-wordmark"><span class="mark"><svg viewBox="0 0 24 24"><use href="#hash"></use></svg></span>Me+</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer class="tail">
+  <div>Visual direction preview — 실제 Claude Design 결과와 다를 수 있어요.</div>
+  <div style="display:flex;align-items:center;gap:4px;"><svg viewBox="0 0 24 24" width="12" height="12" style="color:var(--orange);"><use href="#hash"></use></svg>Me+</div>
+</footer>
+
+<div class="modal-overlay" id="signupOverlay">
+  <div class="modal-card">
+    <button class="modal-close" id="modalClose">
+      <svg viewBox="0 0 24 24" width="14" height="14"><line x1="5" y1="5" x2="19" y2="19" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="19" y1="5" x2="5" y2="19" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+    </button>
+
+    <div class="modal-brand"><span class="mark"><svg viewBox="0 0 24 24" width="13" height="13"><use href="#hash"></use></svg></span>Me+</div>
+
+    <!-- Step 1: sign up form -->
+    <div class="modal-step active" id="stepForm">
+      <div class="modal-title">계정 만들기</div>
+      <div class="modal-sub">이메일 하나로 이메일·시트·Obsidian·봇 대화창을 한 곳에서 관리해요.</div>
+      <form id="signupForm">
+        <div class="field">
+          <label>이메일</label>
+          <input type="email" id="fieldEmail" placeholder="you@example.com" required>
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label>성</label>
+            <input type="text" id="fieldLastName" placeholder="성" required>
+          </div>
+          <div class="field">
+            <label>이름</label>
+            <input type="text" id="fieldFirstName" placeholder="이름" required>
+          </div>
+        </div>
+        <div class="field">
+          <label>비밀번호</label>
+          <input type="password" id="fieldPassword" placeholder="8자 이상" minlength="8" required>
+        </div>
+        <label class="field-check">
+          <input type="checkbox" id="fieldTerms" required>
+          <span><a href="#" onclick="return false;">이용약관</a> 및 <a href="#" onclick="return false;">개인정보처리방침</a>에 동의합니다.</span>
+        </label>
+        <div class="form-error" id="signupError"></div>
+        <button type="submit" class="btn-block" id="signupSubmitBtn">다음</button>
+      </form>
+    </div>
+
+    <!-- Step 2: email verification -->
+    <div class="modal-step" id="stepVerify">
+      <div class="modal-title">이메일을 확인해주세요</div>
+      <div class="modal-sub"><b id="verifyEmailLabel">you@example.com</b>로 인증 코드 6자리를 보냈어요.</div>
+      <input class="code-input" id="codeInput" maxlength="6" inputmode="numeric" placeholder="······">
+      <div class="form-error" id="verifyError"></div>
+      <button class="btn-block" id="verifyBtn">인증하기</button>
+      <span class="resend">코드가 안 왔나요? <b id="resendBtn">재전송</b></span>
+    </div>
+
+    <!-- Step 3: done -->
+    <div class="modal-step" id="stepDone">
+      <div class="modal-success">
+        <div class="success-ring">
+          <svg viewBox="0 0 24 24" width="28" height="28"><path d="M5 13l4 4L19 7" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+        <div class="modal-title">계정이 완성됐어요</div>
+        <div class="modal-sub">이제 이메일, 시트, Obsidian을 연결하고<br>Me+에서 전부 확인해보세요.</div>
+        <button class="btn-block" id="doneBtn">Me+ 시작하기</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="loginOverlay">
+  <div class="modal-card">
+    <button class="modal-close" id="loginModalClose">
+      <svg viewBox="0 0 24 24" width="14" height="14"><line x1="5" y1="5" x2="19" y2="19" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="19" y1="5" x2="5" y2="19" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+    </button>
+    <div class="modal-brand"><span class="mark"><svg viewBox="0 0 24 24" width="13" height="13"><use href="#hash"></use></svg></span>Me+</div>
+    <div class="modal-title">로그인</div>
+    <div class="modal-sub">Me+ 계정으로 로그인하세요.</div>
+    <form id="loginForm">
+      <div class="field">
+        <label>이메일</label>
+        <input type="email" id="loginEmail" placeholder="you@example.com" required>
+      </div>
+      <div class="field">
+        <label>비밀번호</label>
+        <input type="password" id="loginPassword" placeholder="비밀번호" required>
+      </div>
+      <span class="forgot-link">비밀번호를 잊으셨나요?</span>
+      <div class="form-error" id="loginError"></div>
+      <button type="submit" class="btn-block" id="loginSubmitBtn">로그인</button>
+    </form>
+    <div class="modal-link-row">계정이 없으신가요? <b id="goToSignup">가입하기</b></div>
+  </div>
+</div>
+
+<script>
+  // Plain, non-pinned scroll shrink: the intro block sits normally in the page.
+  // Scrolling just shrinks it a bit (it stays fully opaque/visible the whole time — it
+  // never fades away) and it scrolls up and off with the page like any other section,
+  // exactly like scrolling past a normal block of content.
+  const introHero = document.getElementById('introHero');
+  const siteNav = document.getElementById('siteNav');
+  const navActions = document.getElementById('navActions');
+  function lerp(a,b,t){ return a + (b-a)*t; }
+  const SHRINK_RANGE = 220; // px of scroll over which the shrink + nav morph completes — short, so it locks in quickly and stops
+  function updateScroll(){
+    const progress = Math.min(Math.max(window.scrollY / SHRINK_RANGE, 0), 1);
+
+    const scale = 1 - progress * 0.12;
+    const radius = progress * 36;
+    introHero.style.transform = `scale(${scale})`;
+    introHero.style.borderRadius = radius + 'px';
+
+    siteNav.style.top = lerp(0, 18, progress) + 'px';
+    siteNav.style.width = lerp(100, 62, progress) + '%';
+    siteNav.style.maxWidth = '820px';
+    siteNav.style.borderRadius = lerp(0, 999, progress) + 'px';
+    siteNav.style.padding = `${lerp(20,10,progress)}px ${lerp(40,22,progress)}px`;
+    siteNav.style.background = `rgba(20,20,20,${progress*0.6})`;
+    siteNav.style.backdropFilter = `blur(${progress*14}px)`;
+    siteNav.style.borderColor = `rgba(255,255,255,${progress*0.08})`;
+    siteNav.style.gap = lerp(40, 22, progress) + 'px';
+    navActions.querySelector('.nav-signin').style.opacity = 1 - progress;
+    navActions.querySelector('.nav-signin').style.width = lerp(48,0,progress) + 'px';
+    navActions.querySelector('.nav-signin').style.overflow = 'hidden';
+    siteNav.classList.toggle('on-orange', progress < 0.5);
+  }
+  window.addEventListener('scroll', updateScroll, { passive:true });
+  window.addEventListener('resize', updateScroll);
+  updateScroll();
+
+  // Sign up modal: form -> email verification -> done
+  const overlay = document.getElementById('signupOverlay');
+  const stepForm = document.getElementById('stepForm');
+  const stepVerify = document.getElementById('stepVerify');
+  const stepDone = document.getElementById('stepDone');
+  function showStep(step){
+    [stepForm, stepVerify, stepDone].forEach(s => s.classList.remove('active'));
+    step.classList.add('active');
+  }
+  function openModal(){
+    showStep(stepForm);
+    overlay.classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeModal(){
+    overlay.classList.remove('open');
+    document.body.style.overflow = '';
+  }
+  // "Sign in" opens the sign-up flow (email/name/password/terms -> verify -> done)
+  document.querySelectorAll('.nav-signin').forEach(el=>{
+    el.addEventListener('click', openModal);
+  });
+  document.getElementById('modalClose').addEventListener('click', closeModal);
+  overlay.addEventListener('click', (e)=>{ if(e.target === overlay) closeModal(); });
+
+  // "Get Started" opens a plain login window instead
+  const loginOverlay = document.getElementById('loginOverlay');
+  function openLogin(){
+    loginOverlay.classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeLogin(){
+    loginOverlay.classList.remove('open');
+    document.body.style.overflow = '';
+  }
+  document.querySelectorAll('.nav-cta, .btn-primary, .finale-cta').forEach(btn=>{
+    btn.addEventListener('click', openLogin);
+  });
+  document.getElementById('loginModalClose').addEventListener('click', closeLogin);
+  loginOverlay.addEventListener('click', (e)=>{ if(e.target === loginOverlay) closeLogin(); });
+  document.getElementById('loginForm').addEventListener('submit', async function(e){
+    e.preventDefault();
+    const errorEl = document.getElementById('loginError');
+    const btn = document.getElementById('loginSubmitBtn');
+    errorEl.textContent = '';
+
+    const email = document.getElementById('loginEmail').value.trim();
+    const password = document.getElementById('loginPassword').value;
+
+    btn.disabled = true; btn.textContent = '로그인 중...';
+    try {
+      const data = await api('/auth/login', { email, password });
+      sessionToken = data.token;
+      currentUser = data.user;
+      setNavLoggedIn(currentUser);
+      closeLogin();
+    } catch (err) {
+      errorEl.textContent = err.message;
+    } finally {
+      btn.disabled = false; btn.textContent = '로그인';
+    }
+  });
+  document.getElementById('goToSignup').addEventListener('click', function(){
+    closeLogin();
+    openModal();
+  });
+
+  // ---- Real backend wiring (Me+ Node.js API) ----
+  const API_BASE = '/api';
+  let sessionToken = null; // kept in memory only (no localStorage per preview constraints)
+  let currentUser = null;
+  let pendingEmail = '';
+
+  function setNavLoggedIn(user){
+    const signinEls = document.querySelectorAll('.nav-signin');
+    signinEls.forEach(el => { el.textContent = (user.firstName || '') + '님'; });
+  }
+
+  async function api(path, body){
+    let res, data;
+    try {
+      res = await fetch(API_BASE + path, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body || {}),
+      });
+      data = await res.json().catch(()=>({}));
+    } catch (err) {
+      throw new Error('서버에 연결할 수 없어요. 백엔드(npm start)가 실행 중인지 확인해주세요.');
+    }
+    if (!res.ok) {
+      throw new Error(data.message || '요청을 처리하지 못했어요.');
+    }
+    return data;
+  }
+
+  document.getElementById('signupForm').addEventListener('submit', async function(e){
+    e.preventDefault();
+    const errorEl = document.getElementById('signupError');
+    const btn = document.getElementById('signupSubmitBtn');
+    errorEl.textContent = '';
+
+    const email = document.getElementById('fieldEmail').value.trim();
+    const lastName = document.getElementById('fieldLastName').value.trim();
+    const firstName = document.getElementById('fieldFirstName').value.trim();
+    const password = document.getElementById('fieldPassword').value;
+    const agreeTerms = document.getElementById('fieldTerms').checked;
+
+    btn.disabled = true; btn.textContent = '처리 중...';
+    try {
+      await api('/auth/signup', { email, lastName, firstName, password, agreeTerms });
+      pendingEmail = email;
+      document.getElementById('verifyEmailLabel').textContent = email;
+      document.getElementById('verifyError').textContent = '';
+      document.getElementById('codeInput').value = '';
+      showStep(stepVerify);
+    } catch (err) {
+      errorEl.textContent = err.message;
+    } finally {
+      btn.disabled = false; btn.textContent = '다음';
+    }
+  });
+
+  document.getElementById('verifyBtn').addEventListener('click', async function(){
+    const errorEl = document.getElementById('verifyError');
+    const btn = document.getElementById('verifyBtn');
+    const code = document.getElementById('codeInput').value.trim();
+    errorEl.textContent = '';
+    btn.disabled = true; btn.textContent = '확인 중...';
+    try {
+      const data = await api('/auth/verify', { email: pendingEmail, code });
+      sessionToken = data.token;
+      currentUser = data.user;
+      showStep(stepDone);
+    } catch (err) {
+      errorEl.textContent = err.message;
+    } finally {
+      btn.disabled = false; btn.textContent = '인증하기';
+    }
+  });
+
+  document.getElementById('resendBtn').addEventListener('click', async function(){
+    const errorEl = document.getElementById('verifyError');
+    errorEl.textContent = '';
+    try {
+      await api('/auth/verify/resend', { email: pendingEmail });
+      errorEl.style.color = 'var(--muted)';
+      errorEl.textContent = '인증 코드를 다시 보냈어요.';
+    } catch (err) {
+      errorEl.style.color = '';
+      errorEl.textContent = err.message;
+    }
+  });
+
+  document.getElementById('doneBtn').addEventListener('click', function(){
+    if (currentUser) setNavLoggedIn(currentUser);
+    closeModal();
+  });
+
+  const targets = document.querySelectorAll('.phone, .finale');
+  const io = new IntersectionObserver((entries)=>{
+    entries.forEach(e=>{
+      if(e.isIntersecting){ e.target.classList.add('visible'); }
+    });
+  }, { threshold: 0.25 });
+  targets.forEach(t=>io.observe(t));
+</script>
+
+</body>
+</html>
